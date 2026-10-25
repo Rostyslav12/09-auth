@@ -29,7 +29,7 @@ export async function GET() {
           error: error.message,
           response: error.response?.data,
         },
-        { status: error.status ?? 500 }
+        { status: error.status }
       );
     }
 
@@ -67,7 +67,7 @@ export async function PATCH(request: Request) {
           error: error.message,
           response: error.response?.data,
         },
-        { status: error.status ?? 500 }
+        { status: error.status }
       );
     }
 

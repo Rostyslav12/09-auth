@@ -32,7 +32,7 @@ export async function GET(_request: Request, { params }: RouteProps) {
           error: error.message,
           response: error.response?.data,
         },
-        { status: error.status ?? 500 }
+        { status: error.status }
       );
     }
 
@@ -70,7 +70,7 @@ export async function DELETE(_request: Request, { params }: RouteProps) {
           error: error.message,
           response: error.response?.data,
         },
-        { status: error.status ?? 500 }
+        { status: error.status }
       );
     }
 
@@ -109,7 +109,7 @@ export async function PATCH(request: Request, { params }: RouteProps) {
           error: error.message,
           response: error.response?.data,
         },
-        { status: error.status ?? 500 }
+        { status: error.status }
       );
     }
 
