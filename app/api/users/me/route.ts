@@ -34,7 +34,7 @@ export async function GET() {
     }
 
     logErrorResponse({
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: (error as Error).message,
     });
 
     return NextResponse.json(
@@ -72,7 +72,7 @@ export async function PATCH(request: Request) {
     }
 
     logErrorResponse({
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: (error as Error).message,
     });
 
     return NextResponse.json(

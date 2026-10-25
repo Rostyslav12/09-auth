@@ -38,9 +38,7 @@ export async function POST() {
       );
     }
 
-    logErrorResponse({
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    logErrorResponse({ message: (error as Error).message });
 
     return NextResponse.json(
       { error: "Internal Server Error" },

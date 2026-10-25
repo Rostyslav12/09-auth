@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     }
 
     logErrorResponse({
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: (error as Error).message,
     });
 
     return NextResponse.json(
