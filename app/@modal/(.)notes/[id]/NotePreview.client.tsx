@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
-import { fetchNoteById } from "@/lib/api";
+import { fetchNoteById } from "@/lib/api/clientApi";
 import Modal from "../../../../components/Modal/Modal";
 
 interface NotePreviewProps {
@@ -37,14 +37,18 @@ export default function NotePreview({ id }: NotePreviewProps) {
       {note && (
         <article>
           <h1>{note.title}</h1>
+
           <p>
             <strong>Tag:</strong> {note.tag}
           </p>
+
           <p>{note.content || "No content"}</p>
+
           <p>
             <strong>Created:</strong>{" "}
             {new Date(note.createdAt).toLocaleDateString()}
           </p>
+
           <p>
             <strong>Updated:</strong>{" "}
             {new Date(note.updatedAt).toLocaleDateString()}

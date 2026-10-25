@@ -4,9 +4,9 @@ import { Roboto } from "next/font/google";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import TanStackProvider from "../components/TanStackProvider/TanStackProvider";
+import AuthProvider from "@/components/AuthProvider/AuthProvider";
 
 import "./globals.css";
-import AuthProvider from "@/components/AuthProvider/AuthProvider";
 
 const roboto = Roboto({
   weight: ["400", "500", "700"],
@@ -37,9 +37,13 @@ export const metadata: Metadata = {
 
 interface RootLayoutProps {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }
 
-export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
+export default function RootLayout({
+  children,
+  modal,
+}: Readonly<RootLayoutProps>) {
   return (
     <html lang="uk">
       <body className={roboto.variable}>
@@ -48,6 +52,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
             <div className="page">
               <Header />
               <main className="content">{children}</main>
+              {modal}
               <Footer />
             </div>
           </AuthProvider>

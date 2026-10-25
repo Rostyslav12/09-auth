@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useNoteStore } from "../../lib/store/noteStore";
 import type { CreateNoteData } from "../../types/note";
 
-import { createNote } from "@/lib/api";
+import { createNote } from "@/lib/api/clientApi";
 import css from "./NoteForm.module.css";
 
 export default function NoteForm() {
@@ -25,20 +25,15 @@ export default function NoteForm() {
   }, []);
 
   const mutation = useMutation({
-    mutationFn: createNote,
-
+    mutationFn: (note: CreateNoteData) =>
+      createNote({
+        ...note,
+        content: note.content ?? "",
+      }),
     onSuccess: async () => {
-      clearDraft();
-
       await queryClient.invalidateQueries({
         queryKey: ["notes"],
       });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["note"],
-      });
-
-      router.push("/notes/filter/all");
     },
   });
 

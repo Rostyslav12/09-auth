@@ -3,12 +3,15 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+
 import { updateMe } from "@/lib/api/clientApi";
 import { useAuthStore } from "@/lib/store/authStore";
+
 import css from "./page.module.css";
 
 export default function EditProfilePage() {
   const router = useRouter();
+
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
 
@@ -16,14 +19,23 @@ export default function EditProfilePage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (user) {
+      setUsername(user.username);
+    }
+  }, [user]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setError("");
     setLoading(true);
 
     try {
       const updatedUser = await updateMe({ username });
+
       setUser(updatedUser);
+
       router.replace("/profile");
       router.refresh();
     } catch {
@@ -53,6 +65,7 @@ export default function EditProfilePage() {
         <form className={css.profileInfo} onSubmit={handleSubmit}>
           <div className={css.usernameWrapper}>
             <label htmlFor="username">Username:</label>
+
             <input
               id="username"
               type="text"

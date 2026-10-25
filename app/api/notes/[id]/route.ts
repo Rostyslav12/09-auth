@@ -1,37 +1,53 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { logErrorResponse } from '../../_utils/utils';
-import { isAxiosError } from 'axios';
-import api from '@/lib/api/api';
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { isAxiosError } from "axios";
 
-type Props = {
+import { logErrorResponse } from "../../_utils/utils";
+import { api } from "../../api";
+
+type RouteProps = {
   params: Promise<{ id: string }>;
 };
 
-export async function GET(request: Request, { params }: Props) {
+export async function GET(_request: Request, { params }: RouteProps) {
   try {
     const cookieStore = await cookies();
     const { id } = await params;
-    const res = await api(`/notes/${id}`, {
+
+    const res = await api.get(`/notes/${id}`, {
       headers: {
         Cookie: cookieStore.toString(),
       },
     });
-    return NextResponse.json(res.data, { status: res.status });
+
+    return NextResponse.json(res.data, {
+      status: res.status,
+    });
   } catch (error) {
     if (isAxiosError(error)) {
       logErrorResponse(error.response?.data);
+
       return NextResponse.json(
-        { error: error.message, response: error.response?.data },
-        { status: error.status }
+        {
+          error: error.message,
+          response: error.response?.data,
+        },
+        { status: error.response?.status ?? 500 }
       );
     }
-    logErrorResponse({ message: (error as Error).message });
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+
+    logErrorResponse({
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
 
-export async function DELETE(request: Request, { params }: Props) {
+export async function DELETE(_request: Request, { params }: RouteProps) {
   try {
     const cookieStore = await cookies();
     const { id } = await params;
@@ -41,21 +57,35 @@ export async function DELETE(request: Request, { params }: Props) {
         Cookie: cookieStore.toString(),
       },
     });
-    return NextResponse.json(res.data, { status: res.status });
+
+    return NextResponse.json(res.data, {
+      status: res.status,
+    });
   } catch (error) {
     if (isAxiosError(error)) {
       logErrorResponse(error.response?.data);
+
       return NextResponse.json(
-        { error: error.message, response: error.response?.data },
-        { status: error.status }
+        {
+          error: error.message,
+          response: error.response?.data,
+        },
+        { status: error.response?.status ?? 500 }
       );
     }
-    logErrorResponse({ message: (error as Error).message });
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+
+    logErrorResponse({
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
 
-export async function PATCH(request: Request, { params }: Props) {
+export async function PATCH(request: Request, { params }: RouteProps) {
   try {
     const cookieStore = await cookies();
     const { id } = await params;
@@ -66,16 +96,30 @@ export async function PATCH(request: Request, { params }: Props) {
         Cookie: cookieStore.toString(),
       },
     });
-    return NextResponse.json(res.data, { status: res.status });
+
+    return NextResponse.json(res.data, {
+      status: res.status,
+    });
   } catch (error) {
     if (isAxiosError(error)) {
       logErrorResponse(error.response?.data);
+
       return NextResponse.json(
-        { error: error.message, response: error.response?.data },
-        { status: error.status }
+        {
+          error: error.message,
+          response: error.response?.data,
+        },
+        { status: error.response?.status ?? 500 }
       );
     }
-    logErrorResponse({ message: (error as Error).message });
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+
+    logErrorResponse({
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

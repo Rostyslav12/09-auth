@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 
-import { fetchNoteById } from "@/lib/api";
+import { fetchNoteById } from "@/lib/api/serverApi";
 import NotePreview from "./NotePreview.client";
 
 interface NotePreviewPageProps {
@@ -18,12 +18,14 @@ export default async function NotePreviewPage({
   const { id } = await params;
   const queryClient = new QueryClient();
 
-  try {
-    await queryClient.prefetchQuery({
-      queryKey: ["note", id],
-      queryFn: () => fetchNoteById(id),
-    });
-  } catch {
+  await queryClient.prefetchQuery({
+    queryKey: ["note", id],
+    queryFn: () => fetchNoteById(id),
+  });
+
+  const queryState = queryClient.getQueryState(["note", id]);
+
+  if (queryState?.status === "error") {
     notFound();
   }
 

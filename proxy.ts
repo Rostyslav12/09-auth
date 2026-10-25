@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseSetCookie } from "cookie";
+
+import { checkSession } from "./lib/api/serverApi";
 
 const privateRoutes = ["/profile", "/notes"];
 const publicRoutes = ["/sign-in", "/sign-up"];
@@ -9,30 +12,96 @@ function matchesRoute(pathname: string, routes: string[]) {
   );
 }
 
-export function proxy(request: NextRequest) {
+function copyCookies(
+  response: NextResponse,
+  setCookieHeaders: string[] | undefined
+) {
+  if (!setCookieHeaders) {
+    return;
+  }
+
+  for (const cookieString of setCookieHeaders) {
+    const parsed = parseSetCookie(cookieString);
+
+    if (!parsed.value) {
+      continue;
+    }
+
+    response.cookies.set({
+      name: parsed.name,
+      value: parsed.value,
+      path: parsed.path ?? "/",
+      ...(parsed.domain && { domain: parsed.domain }),
+      ...(parsed.expires && { expires: parsed.expires }),
+      ...(parsed.maxAge !== undefined && {
+        maxAge: parsed.maxAge,
+      }),
+      ...(parsed.httpOnly !== undefined && {
+        httpOnly: parsed.httpOnly,
+      }),
+      ...(parsed.secure !== undefined && {
+        secure: parsed.secure,
+      }),
+      ...(parsed.sameSite && {
+        sameSite: parsed.sameSite,
+      }),
+    });
+  }
+}
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isPrivateRoute = matchesRoute(pathname, privateRoutes);
   const isPublicRoute = matchesRoute(pathname, publicRoutes);
 
-  // Назви cookie потрібно звірити з готовими app/api маршрутами.
-  const hasSessionCookie = request.cookies
-    .getAll()
-    .some(
-      (cookie) =>
-        cookie.name.toLowerCase().includes("session") ||
-        cookie.name.toLowerCase().includes("token")
-    );
+  const accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
 
-  if (isPrivateRoute && !hasSessionCookie) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+  let isAuthenticated = Boolean(accessToken);
+  let refreshedCookies: string[] | undefined;
+
+  if (!accessToken && refreshToken) {
+    try {
+      const sessionResponse = await checkSession();
+
+      isAuthenticated = sessionResponse.data.success;
+
+      const setCookie = sessionResponse.headers["set-cookie"];
+
+      refreshedCookies = setCookie
+        ? Array.isArray(setCookie)
+          ? setCookie
+          : [setCookie]
+        : undefined;
+    } catch (error) {
+      console.error("Session refresh failed:", error);
+      isAuthenticated = false;
+    }
   }
 
-  if (isPublicRoute && hasSessionCookie) {
-    return NextResponse.redirect(new URL("/profile", request.url));
+  if (isPrivateRoute && !isAuthenticated) {
+    const response = NextResponse.redirect(new URL("/sign-in", request.url));
+
+    response.cookies.delete("accessToken");
+    response.cookies.delete("refreshToken");
+
+    return response;
   }
 
-  return NextResponse.next();
+  if (isPublicRoute && isAuthenticated) {
+    const response = NextResponse.redirect(new URL("/", request.url));
+
+    copyCookies(response, refreshedCookies);
+
+    return response;
+  }
+
+  const response = NextResponse.next();
+
+  copyCookies(response, refreshedCookies);
+
+  return response;
 }
 
 export const config = {
