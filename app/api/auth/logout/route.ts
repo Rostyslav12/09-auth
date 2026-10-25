@@ -1,36 +1,35 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+﻿import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { isAxiosError } from 'axios';
+import { logErrorResponse } from '../../_utils/utils';
+import api from '@/lib/api/api';
 
-const API_URL = "https://notehub-api.goit.study/api";
-
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
-    const response = await fetch(`${API_URL}/auth/logout`, {
-      method: "POST",
-      headers: {
-        Cookie: request.headers.get("cookie") ?? "",
-      },
-      cache: "no-store",
-    });
+    const cookieStore = await cookies();
 
-    const data = await response.text();
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
-    const result = new NextResponse(data, {
-      status: response.status,
+    await api.post('auth/logout', null, {
       headers: {
-        "Content-Type":
-          response.headers.get("Content-Type") ?? "application/json",
+        Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
       },
     });
 
-    for (const cookie of response.headers.getSetCookie()) {
-      result.headers.append("Set-Cookie", cookie);
+    cookieStore.delete('accessToken');
+    cookieStore.delete('refreshToken');
+
+    return NextResponse.json({ message: 'Logged out successfully' }, { status: 200 });
+  } catch (error) {
+    if (isAxiosError(error)) {
+      logErrorResponse(error.response?.data);
+      return NextResponse.json(
+        { error: error.message, response: error.response?.data },
+        { status: error.status }
+      );
     }
-
-    return result;
-  } catch {
-    return NextResponse.json(
-      { error: "Не вдалося виконати вихід." },
-      { status: 500 },
-    );
+    logErrorResponse({ message: (error as Error).message });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -1,40 +1,43 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { parseSetCookie } from 'cookie';
+import { isAxiosError } from 'axios';
+import { logErrorResponse } from '../../_utils/utils';
+import api from '@/lib/api/api';
 
-const API_URL = "https://notehub-api.goit.study/api";
-
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.text();
+    const body = await req.json();
+    const apiRes = await api.post('auth/login', body);
 
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body,
-      cache: "no-store",
-    });
+    const cookieStore = await cookies();
+    const setCookie = apiRes.headers['set-cookie'];
 
-    const data = await response.text();
+    if (setCookie) {
+      const cookieArray = Array.isArray(setCookie) ? setCookie : [setCookie];
+      for (const cookieStr of cookieArray) {
+        const parsed = parseSetCookie(cookieStr);
 
-    const result = new NextResponse(data, {
-      status: response.status,
-      headers: {
-        "Content-Type":
-          response.headers.get("Content-Type") ?? "application/json",
-      },
-    });
+        if (parsed.value) {
+          cookieStore.set(parsed.name, parsed.value, parsed);
+        }
+      }
 
-    const cookies = response.headers.getSetCookie();
-
-    for (const cookie of cookies) {
-      result.headers.append("Set-Cookie", cookie);
+      return NextResponse.json(apiRes.data, { status: apiRes.status });
     }
 
-    return result;
-  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    if (isAxiosError(error)) {
+      logErrorResponse(error.response?.data);
+      return NextResponse.json(
+        { error: error.message, response: error.response?.data },
+        { status: error.status }
+      );
+    }
+    logErrorResponse({ message: (error as Error).message });
     return NextResponse.json(
-      { error: "Не вдалося виконати вхід." },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }
