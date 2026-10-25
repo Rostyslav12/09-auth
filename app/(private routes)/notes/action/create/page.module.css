@@ -1,0 +1,27 @@
+.main {
+  width: 100%;
+  padding: 40px 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0 0 24px;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@media (max-width: 600px) {
+  .main {
+    padding: 24px 16px;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+}
