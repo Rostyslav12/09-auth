@@ -34,6 +34,9 @@ export default function NoteForm() {
       await queryClient.invalidateQueries({
         queryKey: ["notes"],
       });
+
+      clearDraft();
+      router.back();
     },
   });
 

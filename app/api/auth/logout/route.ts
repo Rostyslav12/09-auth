@@ -1,6 +1,6 @@
-﻿import { NextResponse } from "next/server";
+﻿import { isAxiosError } from "axios";
 import { cookies } from "next/headers";
-import { isAxiosError } from "axios";
+import { NextResponse } from "next/server";
 
 import { logErrorResponse } from "../../_utils/utils";
 import { api } from "../../api";
@@ -14,12 +14,7 @@ export async function POST() {
 
     await api.post("auth/logout", null, {
       headers: {
-        Cookie: [
-          accessToken ? `accessToken=${accessToken}` : "",
-          refreshToken ? `refreshToken=${refreshToken}` : "",
-        ]
-          .filter(Boolean)
-          .join("; "),
+        Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`, 
       },
     });
 
@@ -39,7 +34,7 @@ export async function POST() {
           error: error.message,
           response: error.response?.data,
         },
-        { status: error.response?.status ?? 500 }
+        { status: error.status ?? 500 }
       );
     }
 

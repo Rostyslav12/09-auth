@@ -50,7 +50,7 @@ export async function GET() {
     }
 
     logErrorResponse({
-      message: error instanceof Error ? error.message : "Unknown error",
+      message: (error as Error).message,
     });
 
     return NextResponse.json({ success: false }, { status: 200 });

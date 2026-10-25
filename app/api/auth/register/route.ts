@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
           error: error.message,
           response: error.response?.data,
         },
-        { status: error.response?.status ?? 500 }
+        { status: error.status ?? 500 }
       );
     }
 

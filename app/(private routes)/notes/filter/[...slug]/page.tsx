@@ -6,7 +6,7 @@ import {
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { fetchNotes } from "@/lib/api/clientApi";
+import { fetchNotes } from "@/lib/api/serverApi";
 import NotesClient from "./Notes.client";
 
 const allowedTags = ["Todo", "Work", "Personal", "Meeting", "Shopping"];

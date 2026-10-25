@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { isAxiosError } from "axios";
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
 import { logErrorResponse } from "../_utils/utils";
 import { api } from "../api";
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
           error: error.message,
           response: error.response?.data,
         },
-        { status: error.response?.status ?? 500 }
+        { status: error.status ?? 500 }
       );
     }
 
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
           error: error.message,
           response: error.response?.data,
         },
-        { status: error.response?.status ?? 500 }
+        { status: error.status ?? 500 }
       );
     }
 
